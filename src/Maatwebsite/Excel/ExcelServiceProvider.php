@@ -25,7 +25,8 @@ use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
  * @author     Maatwebsite <info@maatwebsite.nl>
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt    LGPL
  */
-class ExcelServiceProvider extends ServiceProvider {
+class ExcelServiceProvider extends ServiceProvider
+{
 
     /**
      * Indicates if loading of the provider is deferred.
@@ -42,13 +43,11 @@ class ExcelServiceProvider extends ServiceProvider {
 
     public function boot()
     {
-       // $this->publishes([
-      //      __DIR__ . '/../../config/excel.php' => config_path('excel.php'),
-      //  ]);
+        // $this->publishes([
+        //      __DIR__ . '/../../config/excel.php' => config_path('excel.php'),
+        //  ]);
 
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../config/excel.php', 'excel'
-        );
+        $this->mergeConfigFrom(file_exists(app()->basePath() . '/config/excel.php') ? app()->basePath() . '/config/excel.php' : __DIR__ . '/../../config/excel.php', 'excel');
 
         //Set the autosizing settings
         $this->setAutoSizingSettings();
@@ -80,8 +79,7 @@ class ExcelServiceProvider extends ServiceProvider {
         $me = $this;
 
         // Bind the PHPExcel class
-        $this->app['phpexcel'] = $this->app->share(function () use ($me)
-        {
+        $this->app['phpexcel'] = $this->app->share(function () use ($me) {
             // Set locale
             $me->setLocale();
 
@@ -101,8 +99,7 @@ class ExcelServiceProvider extends ServiceProvider {
     protected function bindCssParser()
     {
         // Bind css parser
-        $this->app['excel.parsers.css'] = $this->app->share(function ()
-        {
+        $this->app['excel.parsers.css'] = $this->app->share(function () {
             return new CssParser(
                 new CssToInlineStyles()
             );
@@ -116,8 +113,7 @@ class ExcelServiceProvider extends ServiceProvider {
     protected function bindReaders()
     {
         // Bind the laravel excel reader
-        $this->app['excel.reader'] = $this->app->share(function ($app)
-        {
+        $this->app['excel.reader'] = $this->app->share(function ($app) {
             return new LaravelExcelReader(
                 $app['files'],
                 $app['excel.identifier'],
@@ -126,8 +122,7 @@ class ExcelServiceProvider extends ServiceProvider {
         });
 
         // Bind the html reader class
-        $this->app['excel.readers.html'] = $this->app->share(function ($app)
-        {
+        $this->app['excel.readers.html'] = $this->app->share(function ($app) {
             return new Html(
                 $app['excel.parsers.css']
             );
@@ -141,8 +136,7 @@ class ExcelServiceProvider extends ServiceProvider {
     protected function bindParsers()
     {
         // Bind the view parser
-        $this->app['excel.parsers.view'] = $this->app->share(function ($app)
-        {
+        $this->app['excel.parsers.view'] = $this->app->share(function ($app) {
             return new ViewParser(
                 $app['excel.readers.html']
             );
@@ -156,8 +150,7 @@ class ExcelServiceProvider extends ServiceProvider {
     protected function bindWriters()
     {
         // Bind the excel writer
-        $this->app['excel.writer'] = $this->app->share(function ($app)
-        {
+        $this->app['excel.writer'] = $this->app->share(function ($app) {
             return new LaravelExcelWriter(
                 $app->make("Illuminate\Support\Facades\Response"),
                 $app['files'],
@@ -173,8 +166,7 @@ class ExcelServiceProvider extends ServiceProvider {
     protected function bindExcel()
     {
         // Bind the Excel class and inject its dependencies
-        $this->app['excel'] = $this->app->share(function ($app)
-        {
+        $this->app['excel'] = $this->app->share(function ($app) {
             $excel = new Excel(
                 $app['phpexcel'],
                 $app['excel.reader'],
@@ -186,7 +178,7 @@ class ExcelServiceProvider extends ServiceProvider {
 
             return $excel;
         });
-        
+
         $this->app->alias('phpexcel', PHPExcel::class);
     }
 
@@ -197,8 +189,7 @@ class ExcelServiceProvider extends ServiceProvider {
     protected function bindClasses()
     {
         // Bind the format identifier
-        $this->app['excel.identifier'] = $this->app->share(function ($app)
-        {
+        $this->app['excel.identifier'] = $this->app->share(function ($app) {
             return new FormatIdentifier($app['files']);
         });
     }
